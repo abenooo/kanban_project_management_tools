@@ -1,10 +1,16 @@
-"use client"
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogFooter,  } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
+"use client";
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 type Task = {
   id: number;
@@ -17,9 +23,70 @@ type Task = {
   date?: string;
 };
 
+type TaskList = {
+  [key: string]: Task[];
+};
+
+const initialTasks: TaskList = {
+  backlog: [
+    {
+      id: 1,
+      title: "Task 1",
+      description: "This is a description for task 1.",
+    },
+    {
+      id: 2,
+      title: "Task 2",
+      description: "This is a description for task 2.",
+    },
+    {
+      id: 3,
+      title: "Task 3",
+      description: "This is a description for task 3.",
+    },
+  ],
+  todo: [
+    {
+      id: 4,
+      title: "Task 4",
+      description: "This is a description for task 4.",
+    },
+    {
+      id: 5,
+      title: "Task 5",
+      description: "This is a description for task 5.",
+    },
+  ],
+  inProgress: [
+    {
+      id: 6,
+      title: "Task 6",
+      description: "This is a description for task 6.",
+    },
+    {
+      id: 7,
+      title: "Task 7",
+      description: "This is a description for task 7.",
+    },
+  ],
+  done: [
+    {
+      id: 8,
+      title: "Task 8",
+      description: "This is a description for task 8.",
+    },
+    {
+      id: 9,
+      title: "Task 9",
+      description: "This is a description for task 9.",
+    },
+  ],
+};
+
 export default function Kanban() {
   const [open, setOpen] = useState(false);
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
+  const [tasks, setTasks] = useState(initialTasks);
 
   const handleCardClick = (task: Task) => {
     setCurrentTask(task);
@@ -31,35 +98,54 @@ export default function Kanban() {
     setCurrentTask(null);
   };
 
-  const renderCard = (task: Task) => (
-    <div key={task.id} className="bg-white p-3 rounded-lg shadow-sm mb-4" onClick={() => handleCardClick(task)}>
-      <h3 className="text-sm font-semibold mb-1">{task.title}</h3>
-      <p className="text-sm text-gray-600 dark:text-gray-400">{task.description}</p>
-    </div>
-  );
+  const handleDragEnd = (result: any) => {
+    if (!result.destination) return;
 
-  const tasks = {
-    backlog: [
-      { id: 1, title: 'Task 1', description: 'This is a description for task 1.' },
-      { id: 2, title: 'Task 2', description: 'This is a description for task 2.' },
-      { id: 3, title: 'Task 3', description: 'This is a description for task 3.' },
-    ],
-    todo: [
-      { id: 4, title: 'Task 4', description: 'This is a description for task 4.' },
-      { id: 5, title: 'Task 5', description: 'This is a description for task 5.' },
-    ],
-    inProgress: [
-      { id: 6, title: 'Task 6', description: 'This is a description for task 6.' },
-      { id: 7, title: 'Task 7', description: 'This is a description for task 7.' },
-    ],
-    done: [
-      { id: 8, title: 'Task 8', description: 'This is a description for task 8.' },
-      { id: 9, title: 'Task 9', description: 'This is a description for task 9.' },
-    ],
+    const { source, destination } = result;
+
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    )
+      return;
+
+    const sourceColumn = tasks[source.droppableId];
+    const destColumn = tasks[destination.droppableId];
+    const sourceItems = Array.from(sourceColumn);
+    const destItems = Array.from(destColumn);
+    const [removed] = sourceItems.splice(source.index, 1);
+    destItems.splice(destination.index, 0, removed);
+
+    setTasks({
+      ...tasks,
+      [source.droppableId]: sourceItems,
+      [destination.droppableId]: destItems,
+    });
   };
+
+  const renderCard = (task: Task, index: number) => (
+    
+    <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
+      {(provided) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          className="bg-white p-3 rounded-lg shadow-sm mb-4"
+          onClick={() => handleCardClick(task)}
+        >
+          <h3 className="text-sm font-semibold mb-1">{task.title}</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {task.description}
+          </p>
+        </div>
+      )}
+    </Draggable>
+  );
 
   return (
     <div key="1" className="flex flex-col h-screen">
+
       <header className="h-[60px] flex items-center px-4 shadow-md">
         <h1 className="text-sm font-medium text-gray-900 dark:text-gray-50 flex items-center">
           <KanbanIcon className="mr-2 h-4 w-4" />
@@ -67,36 +153,27 @@ export default function Kanban() {
         </h1>
       </header>
       <main className="flex-1 overflow-auto py-4 px-4 bg-gray-100">
-        <div className="flex space-x-4">
-          <div className="w-72">
-            <h2 className="mb-4 text-sm font-medium text-gray-400 dark:text-gray-300 flex items-center">
-              <BackpackIcon className="mr-2 h-4 w-4" />
-              Backlog
-            </h2>
-            {tasks.backlog.map(renderCard)}
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <div className="flex space-x-4">
+            {Object.entries(tasks).map(([columnId, columnTasks]) => (
+              <Droppable key={columnId} droppableId={columnId}>
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className="w-72"
+                  >
+                    <h2 className="mb-4 text-sm font-medium text-gray-400 dark:text-gray-300 flex items-center">
+                      {columnId.charAt(0).toUpperCase() + columnId.slice(1)}
+                    </h2>
+                    {columnTasks.map((task, index) => renderCard(task, index))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            ))}
           </div>
-          <div className="w-72">
-            <h2 className="mb-4 text-sm font-medium text-gray-400 dark:text-gray-300 flex items-center">
-              <ListTodoIcon className="mr-2 h-4 w-4" />
-              To Do
-            </h2>
-            {tasks.todo.map(renderCard)}
-          </div>
-          <div className="w-72">
-            <h2 className="mb-4 text-sm font-medium text-gray-400 dark:text-gray-300 flex items-center">
-              <ActivityIcon className="mr-2 h-4 w-4" />
-              In Progress
-            </h2>
-            {tasks.inProgress.map(renderCard)}
-          </div>
-          <div className="w-72">
-            <h2 className="mb-4 text-sm font-medium text-gray-400 dark:text-gray-300 flex items-center">
-              <CheckIcon className="mr-2 h-4 w-4" />
-              Done
-            </h2>
-            {tasks.done.map(renderCard)}
-          </div>
-        </div>
+        </DragDropContext>
       </main>
       {currentTask && (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -106,32 +183,74 @@ export default function Kanban() {
             </DialogHeader>
             <div>
               <div className="mb-4">
-                <Label className="block text-sm font-medium text-gray-700">Title</Label>
-                <Input type="text" className="mt-1 block w-full" defaultValue={currentTask.title} />
+                <Label className="block text-sm font-medium text-gray-700">
+                  Title
+                </Label>
+                <Input
+                  type="text"
+                  className="mt-1 block w-full"
+                  defaultValue={currentTask.title}
+                />
               </div>
               <div className="mb-4">
-                <Label className="block text-sm font-medium text-gray-700">Status</Label>
-                <Input type="text" className="mt-1 block w-full" defaultValue={currentTask.status} />
+                <Label className="block text-sm font-medium text-gray-700">
+                  Status
+                </Label>
+                <Input
+                  type="text"
+                  className="mt-1 block w-full"
+                  defaultValue={currentTask.status}
+                />
               </div>
               <div className="mb-4">
-                <Label className="block text-sm font-medium text-gray-700">Members</Label>
-                <Input type="text" className="mt-1 block w-full" defaultValue={currentTask.members} />
+                <Label className="block text-sm font-medium text-gray-700">
+                  Members
+                </Label>
+                <Input
+                  type="text"
+                  className="mt-1 block w-full"
+                  defaultValue={currentTask.members}
+                />
               </div>
               <div className="mb-4">
-                <Label className="block text-sm font-medium text-gray-700">Labels</Label>
-                <Input type="text" className="mt-1 block w-full" defaultValue={currentTask.labels} />
+                <Label className="block text-sm font-medium text-gray-700">
+                  Labels
+                </Label>
+                <Input
+                  type="text"
+                  className="mt-1 block w-full"
+                  defaultValue={currentTask.labels}
+                />
               </div>
               <div className="mb-4">
-                <Label className="block text-sm font-medium text-gray-700">Notifications</Label>
-                <Input type="text" className="mt-1 block w-full" defaultValue={currentTask.notifications} />
+                <Label className="block text-sm font-medium text-gray-700">
+                  Notifications
+                </Label>
+                <Input
+                  type="text"
+                  className="mt-1 block w-full"
+                  defaultValue={currentTask.notifications}
+                />
               </div>
               <div className="mb-4">
-                <Label className="block text-sm font-medium text-gray-700">Date</Label>
-                <Input type="text" className="mt-1 block w-full" defaultValue={currentTask.date} />
+                <Label className="block text-sm font-medium text-gray-700">
+                  Date
+                </Label>
+                <Input
+                  type="text"
+                  className="mt-1 block w-full"
+                  defaultValue={currentTask.date}
+                />
               </div>
               <div className="mb-4">
-                <Label className="block text-sm font-medium text-gray-700">Description</Label>
-                <Textarea className="mt-1 block w-full" defaultValue={currentTask.description} rows={4}></Textarea>
+                <Label className="block text-sm font-medium text-gray-700">
+                  Description
+                </Label>
+                <Textarea
+                  className="mt-1 block w-full"
+                  defaultValue={currentTask.description}
+                  rows={4}
+                ></Textarea>
               </div>
             </div>
             <DialogFooter>
