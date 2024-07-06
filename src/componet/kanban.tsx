@@ -76,7 +76,7 @@ export default function Kanban() {
     )
   }
   
-  function ActivityIcon(props) {
+  function ActivityIcon(props:any) {
     return (
       <svg
         {...props}
@@ -96,7 +96,7 @@ export default function Kanban() {
   }
   
   
-  function BackpackIcon(props) {
+  function BackpackIcon(props:any) {
     return (
       <svg
         {...props}
@@ -120,7 +120,7 @@ export default function Kanban() {
   }
   
   
-  function CheckIcon(props) {
+  function CheckIcon(props:any) {
     return (
       <svg
         {...props}
@@ -140,7 +140,7 @@ export default function Kanban() {
   }
   
   
-  function KanbanIcon(props) {
+  function KanbanIcon(props:any) {
     return (
       <svg
         {...props}
@@ -162,7 +162,7 @@ export default function Kanban() {
   }
   
   
-  function ListTodoIcon(props) {
+  function ListTodoIcon(props:any) {
     return (
       <svg
         {...props}
