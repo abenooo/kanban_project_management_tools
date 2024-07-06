@@ -2,6 +2,9 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogFooter,  } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 
 type Task = {
   id: number;
@@ -103,32 +106,32 @@ export default function Kanban() {
             </DialogHeader>
             <div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Title</label>
-                <input type="text" className="mt-1 block w-full" defaultValue={currentTask.title} />
+                <Label className="block text-sm font-medium text-gray-700">Title</Label>
+                <Input type="text" className="mt-1 block w-full" defaultValue={currentTask.title} />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Status</label>
-                <input type="text" className="mt-1 block w-full" defaultValue={currentTask.status} />
+                <Label className="block text-sm font-medium text-gray-700">Status</Label>
+                <Input type="text" className="mt-1 block w-full" defaultValue={currentTask.status} />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Members</label>
-                <input type="text" className="mt-1 block w-full" defaultValue={currentTask.members} />
+                <Label className="block text-sm font-medium text-gray-700">Members</Label>
+                <Input type="text" className="mt-1 block w-full" defaultValue={currentTask.members} />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Labels</label>
-                <input type="text" className="mt-1 block w-full" defaultValue={currentTask.labels} />
+                <Label className="block text-sm font-medium text-gray-700">Labels</Label>
+                <Input type="text" className="mt-1 block w-full" defaultValue={currentTask.labels} />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Notifications</label>
-                <input type="text" className="mt-1 block w-full" defaultValue={currentTask.notifications} />
+                <Label className="block text-sm font-medium text-gray-700">Notifications</Label>
+                <Input type="text" className="mt-1 block w-full" defaultValue={currentTask.notifications} />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Date</label>
-                <input type="text" className="mt-1 block w-full" defaultValue={currentTask.date} />
+                <Label className="block text-sm font-medium text-gray-700">Date</Label>
+                <Input type="text" className="mt-1 block w-full" defaultValue={currentTask.date} />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Description</label>
-                <textarea className="mt-1 block w-full" defaultValue={currentTask.description} rows={4}></textarea>
+                <Label className="block text-sm font-medium text-gray-700">Description</Label>
+                <Textarea className="mt-1 block w-full" defaultValue={currentTask.description} rows={4}></Textarea>
               </div>
             </div>
             <DialogFooter>
