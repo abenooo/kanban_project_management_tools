@@ -127,6 +127,7 @@ export default function Kanban() {
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const [currentCategory, setCurrentCategory] = useState("Product Roadmap");
   const [tasks, setTasks] = useState(taskData[currentCategory]);
+  // const { theme, setTheme } = useTheme(); // Use the useTheme hook
 
   const handleCardClick = (task: Task) => {
     setCurrentTask(task);
@@ -175,7 +176,7 @@ export default function Kanban() {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className="bg-white p-3 rounded-lg shadow-sm mb-4"
+          className="bg-white p-3 rounded-lg shadow-sm mb-4 dark:bg-gray-800 dark:text-white" // Add dark mode classes
           onClick={() => handleCardClick(task)}
         >
           <h3 className="text-sm font-semibold mb-1">{task.title}</h3>
@@ -190,16 +191,16 @@ export default function Kanban() {
   return (
     <>
       <Navbar />
-      <div className="flex h-screen">
+      <div className="flex h-screen dark:bg-gray-900"> {/* Add dark mode class */}
         <Sidebar onSelect={handleCategorySelect} />
         <div className="flex flex-col flex-1">
-          <header className="h-[60px] flex items-center px-4 shadow-md">
+          <header className="h-[60px] flex items-center px-4 shadow-md dark:bg-gray-800"> {/* Add dark mode class */}
             <h1 className="text-sm font-medium text-gray-900 dark:text-gray-50 flex items-center">
               <KanbanIcon className="mr-2 h-4 w-4" />
               Kanban Board - {currentCategory}
             </h1>
           </header>
-          <main className="flex-1 overflow-auto py-4 px-4 bg-gray-100">
+          <main className="flex-1 overflow-auto py-4 px-4 bg-gray-100 dark:bg-gray-900"> {/* Add dark mode class */}
             <DragDropContext onDragEnd={handleDragEnd}>
               <div className="flex space-x-4">
                 {Object.entries(tasks).map(([columnId, columnTasks]) => (
@@ -233,7 +234,7 @@ export default function Kanban() {
                 </DialogHeader>
                 <div>
                   <div className="mb-4">
-                    <Label className="block text-sm font-medium text-gray-700">
+                    <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Title
                     </Label>
                     <Input
@@ -243,7 +244,7 @@ export default function Kanban() {
                     />
                   </div>
                   <div className="mb-4">
-                    <Label className="block text-sm font-medium text-gray-700">
+                    <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Status
                     </Label>
                     <Input
@@ -253,7 +254,7 @@ export default function Kanban() {
                     />
                   </div>
                   <div className="mb-4">
-                    <Label className="block text-sm font-medium text-gray-700">
+                    <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Members
                     </Label>
                     <Input
@@ -263,7 +264,7 @@ export default function Kanban() {
                     />
                   </div>
                   <div className="mb-4">
-                    <Label className="block text-sm font-medium text-gray-700">
+                    <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Labels
                     </Label>
                     <Input
@@ -273,7 +274,7 @@ export default function Kanban() {
                     />
                   </div>
                   <div className="mb-4">
-                    <Label className="block text-sm font-medium text-gray-700">
+                    <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Notifications
                     </Label>
                     <Input
@@ -283,7 +284,7 @@ export default function Kanban() {
                     />
                   </div>
                   <div className="mb-4">
-                    <Label className="block text-sm font-medium text-gray-700">
+                    <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Date
                     </Label>
                     <Input
@@ -293,7 +294,7 @@ export default function Kanban() {
                     />
                   </div>
                   <div className="mb-4">
-                    <Label className="block text-sm font-medium text-gray-700">
+                    <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Description
                     </Label>
                     <Textarea
