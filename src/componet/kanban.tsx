@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import Navbar from "./Navbar";
 import { Sidebar } from "./Sidebar";
 
 type Task = {
@@ -187,129 +188,135 @@ export default function Kanban() {
   );
 
   return (
-    <div className="flex h-screen">
-      <Sidebar onSelect={handleCategorySelect} />
-      <div className="flex flex-col flex-1">
-        <header className="h-[60px] flex items-center px-4 shadow-md">
-          <h1 className="text-sm font-medium text-gray-900 dark:text-gray-50 flex items-center">
-            <KanbanIcon className="mr-2 h-4 w-4" />
-            Kanban Board - {currentCategory}
-          </h1>
-        </header>
-        <main className="flex-1 overflow-auto py-4 px-4 bg-gray-100">
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <div className="flex space-x-4">
-              {Object.entries(tasks).map(([columnId, columnTasks]) => (
-                <Droppable key={columnId} droppableId={columnId}>
-                  {(provided) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className="w-72"
-                    >
-                      <h2 className="mb-4 text-sm font-medium text-gray-400 dark:text-gray-300 flex items-center">
-                        {columnId.charAt(0).toUpperCase() + columnId.slice(1)}
-                      </h2>
-                      {columnTasks.map((task, index) => renderCard(task, index))}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              ))}
-            </div>
-          </DragDropContext>
-        </main>
-        {currentTask && (
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <h3>{currentTask.title}</h3>
-              </DialogHeader>
-              <div>
-                <div className="mb-4">
-                  <Label className="block text-sm font-medium text-gray-700">
-                    Title
-                  </Label>
-                  <Input
-                    type="text"
-                    className="mt-1 block w-full"
-                    defaultValue={currentTask.title}
-                  />
-                </div>
-                <div className="mb-4">
-                  <Label className="block text-sm font-medium text-gray-700">
-                    Status
-                  </Label>
-                  <Input
-                    type="text"
-                    className="mt-1 block w-full"
-                    defaultValue={currentTask.status}
-                  />
-                </div>
-                <div className="mb-4">
-                  <Label className="block text-sm font-medium text-gray-700">
-                    Members
-                  </Label>
-                  <Input
-                    type="text"
-                    className="mt-1 block w-full"
-                    defaultValue={currentTask.members}
-                  />
-                </div>
-                <div className="mb-4">
-                  <Label className="block text-sm font-medium text-gray-700">
-                    Labels
-                  </Label>
-                  <Input
-                    type="text"
-                    className="mt-1 block w-full"
-                    defaultValue={currentTask.labels}
-                  />
-                </div>
-                <div className="mb-4">
-                  <Label className="block text-sm font-medium text-gray-700">
-                    Notifications
-                  </Label>
-                  <Input
-                    type="text"
-                    className="mt-1 block w-full"
-                    defaultValue={currentTask.notifications}
-                  />
-                </div>
-                <div className="mb-4">
-                  <Label className="block text-sm font-medium text-gray-700">
-                    Date
-                  </Label>
-                  <Input
-                    type="text"
-                    className="mt-1 block w-full"
-                    defaultValue={currentTask.date}
-                  />
-                </div>
-                <div className="mb-4">
-                  <Label className="block text-sm font-medium text-gray-700">
-                    Description
-                  </Label>
-                  <Textarea
-                    className="mt-1 block w-full"
-                    defaultValue={currentTask.description}
-                    rows={4}
-                  ></Textarea>
-                </div>
+    <>
+      <Navbar />
+      <div className="flex h-screen">
+        <Sidebar onSelect={handleCategorySelect} />
+        <div className="flex flex-col flex-1">
+          <header className="h-[60px] flex items-center px-4 shadow-md">
+            <h1 className="text-sm font-medium text-gray-900 dark:text-gray-50 flex items-center">
+              <KanbanIcon className="mr-2 h-4 w-4" />
+              Kanban Board - {currentCategory}
+            </h1>
+          </header>
+          <main className="flex-1 overflow-auto py-4 px-4 bg-gray-100">
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <div className="flex space-x-4">
+                {Object.entries(tasks).map(([columnId, columnTasks]) => (
+                  <Droppable key={columnId} droppableId={columnId}>
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className="w-72"
+                      >
+                        <h2 className="mb-4 text-sm font-medium text-gray-400 dark:text-gray-300 flex items-center">
+                          {columnId.charAt(0).toUpperCase() +
+                            columnId.slice(1)}
+                        </h2>
+                        {columnTasks.map((task, index) =>
+                          renderCard(task, index)
+                        )}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                ))}
               </div>
-              <DialogFooter>
-                <Button onClick={handleClose} color="primary">
-                  Cancel
-                </Button>
-                <Button onClick={handleClose} color="primary">
-                  Save
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
+            </DragDropContext>
+          </main>
+          {currentTask && (
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <h3>{currentTask.title}</h3>
+                </DialogHeader>
+                <div>
+                  <div className="mb-4">
+                    <Label className="block text-sm font-medium text-gray-700">
+                      Title
+                    </Label>
+                    <Input
+                      type="text"
+                      className="mt-1 block w-full"
+                      defaultValue={currentTask.title}
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <Label className="block text-sm font-medium text-gray-700">
+                      Status
+                    </Label>
+                    <Input
+                      type="text"
+                      className="mt-1 block w-full"
+                      defaultValue={currentTask.status}
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <Label className="block text-sm font-medium text-gray-700">
+                      Members
+                    </Label>
+                    <Input
+                      type="text"
+                      className="mt-1 block w-full"
+                      defaultValue={currentTask.members}
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <Label className="block text-sm font-medium text-gray-700">
+                      Labels
+                    </Label>
+                    <Input
+                      type="text"
+                      className="mt-1 block w-full"
+                      defaultValue={currentTask.labels}
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <Label className="block text-sm font-medium text-gray-700">
+                      Notifications
+                    </Label>
+                    <Input
+                      type="text"
+                      className="mt-1 block w-full"
+                      defaultValue={currentTask.notifications}
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <Label className="block text-sm font-medium text-gray-700">
+                      Date
+                    </Label>
+                    <Input
+                      type="text"
+                      className="mt-1 block w-full"
+                      defaultValue={currentTask.date}
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <Label className="block text-sm font-medium text-gray-700">
+                      Description
+                    </Label>
+                    <Textarea
+                      className="mt-1 block w-full"
+                      defaultValue={currentTask.description}
+                      rows={4}
+                    ></Textarea>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button onClick={handleClose} color="primary">
+                    Cancel
+                  </Button>
+                  <Button onClick={handleClose} color="primary">
+                    Save
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
