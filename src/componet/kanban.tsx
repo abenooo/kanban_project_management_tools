@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,15 +10,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DndProvider, useDrag, useDrop } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import Navbar from "./Navbar";
 import { Sidebar } from "./Sidebar";
+
+const CARD_TYPE = "CARD";
 
 type Task = {
   id: number;
   title: string;
   description: string;
-  status?: string;
+  status: string;
   members?: string;
   labels?: string;
   notifications?: string;
@@ -32,94 +35,86 @@ type TaskList = {
 const taskData: { [key: string]: TaskList } = {
   "Product Roadmap": {
     backlog: [
-      { id: 1, title: "Roadmap Task 1", description: "Description for task 1." },
-      { id: 2, title: "Roadmap Task 2", description: "Description for task 2." },
+      { id: 1, title: "Roadmap Task 1", description: "Description for task 1.", status: "backlog" },
+      { id: 2, title: "Roadmap Task 2", description: "Description for task 2.", status: "backlog" },
     ],
     todo: [
-      { id: 3, title: "Roadmap Task 3", description: "Description for task 3." },
+      { id: 3, title: "Roadmap Task 3", description: "Description for task 3.", status: "todo" },
     ],
     inProgress: [
-      { id: 4, title: "Roadmap Task 4", description: "Description for task 4." },
+      { id: 4, title: "Roadmap Task 4", description: "Description for task 4.", status: "inProgress" },
     ],
     done: [
-      { id: 5, title: "Roadmap Task 5", description: "Description for task 5." },
+      { id: 5, title: "Roadmap Task 5", description: "Description for task 5.", status: "done" },
     ],
   },
   "Marketing Campaigns": {
     backlog: [
-      { id: 6, title: "Marketing Task 1", description: "Description for task 1." },
-      { id: 7, title: "Marketing Task 2", description: "Description for task 2." },
+      { id: 6, title: "Marketing Task 1", description: "Description for task 1.", status: "backlog" },
+      { id: 7, title: "Marketing Task 2", description: "Description for task 2.", status: "backlog" },
     ],
     todo: [
-      { id: 8, title: "Marketing Task 3", description: "Description for task 3." },
+      { id: 8, title: "Marketing Task 3", description: "Description for task 3.", status: "todo" },
     ],
     inProgress: [
-      { id: 9, title: "Marketing Task 4", description: "Description for task 4." },
+      { id: 9, title: "Marketing Task 4", description: "Description for task 4.", status: "inProgress" },
     ],
     done: [
-      { id: 10, title: "Marketing Task 5", description: "Description for task 5." },
+      { id: 10, title: "Marketing Task 5", description: "Description for task 5.", status: "done" },
     ],
   },
-  "Engineering Sprints": {
-    backlog: [
-      { id: 11, title: "Sprint Task 1", description: "Description for task 1." },
-      { id: 12, title: "Sprint Task 2", description: "Description for task 2." },
-    ],
-    todo: [
-      { id: 13, title: "Sprint Task 3", description: "Description for task 3." },
-    ],
-    inProgress: [
-      { id: 14, title: "Sprint Task 4", description: "Description for task 4." },
-    ],
-    done: [
-      { id: 15, title: "Sprint Task 5", description: "Description for task 5." },
-    ],
-  },
-  "Content Calendar": {
-    backlog: [
-      { id: 16, title: "Content Task 1", description: "Description for task 1." },
-      { id: 17, title: "Content Task 2", description: "Description for task 2." },
-    ],
-    todo: [
-      { id: 18, title: "Content Task 3", description: "Description for task 3." },
-    ],
-    inProgress: [
-      { id: 19, title: "Content Task 4", description: "Description for task 4." },
-    ],
-    done: [
-      { id: 20, title: "Content Task 5", description: "Description for task 5." },
-    ],
-  },
-  "Design Sprint": {
-    backlog: [
-      { id: 21, title: "Design Task 1", description: "Description for task 1." },
-      { id: 22, title: "Design Task 2", description: "Description for task 2." },
-    ],
-    todo: [
-      { id: 23, title: "Design Task 3", description: "Description for task 3." },
-    ],
-    inProgress: [
-      { id: 24, title: "Design Task 4", description: "Description for task 4." },
-    ],
-    done: [
-      { id: 25, title: "Design Task 5", description: "Description for task 5." },
-    ],
-  },
-  "Startup Launch": {
-    backlog: [
-      { id: 26, title: "Launch Task 1", description: "Description for task 1." },
-      { id: 27, title: "Launch Task 2", description: "Description for task 2." },
-    ],
-    todo: [
-      { id: 28, title: "Launch Task 3", description: "Description for task 3." },
-    ],
-    inProgress: [
-      { id: 29, title: "Launch Task 4", description: "Description for task 4." },
-    ],
-    done: [
-      { id: 30, title: "Launch Task 5", description: "Description for task 5." },
-    ],
-  },
+  // ... other categories
+};
+
+const DraggableCard: React.FC<{ task: Task, index: number, moveCard: (dragIndex: number, hoverIndex: number, sourceColumn: string, destColumn: string) => void, columnId: string }> = ({ task, index, moveCard, columnId }) => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  const [, drag] = useDrag({
+    type: CARD_TYPE,
+    item: { id: task.id, index, columnId },
+  });
+
+  const [, drop] = useDrop({
+    accept: CARD_TYPE,
+    hover: (draggedItem: { id: number; index: number; columnId: string }) => {
+      if (draggedItem.index !== index || draggedItem.columnId !== columnId) {
+        moveCard(draggedItem.index, index, draggedItem.columnId, columnId);
+        draggedItem.index = index;
+        draggedItem.columnId = columnId;
+      }
+    },
+  });
+
+  drag(drop(ref));
+
+  return (
+    <div
+      ref={ref}
+      className="bg-white p-3 rounded-lg shadow-sm mb-4 dark:bg-gray-800 dark:text-white cursor-move"
+    >
+      <h3 className="text-sm font-semibold mb-1">{task.title}</h3>
+      <p className="text-sm text-gray-600 dark:text-gray-400">{task.description}</p>
+      <p className="text-xs text-gray-500 dark:text-gray-500">Status: {task.status}</p>
+    </div>
+  );
+};
+
+const DroppableColumn: React.FC<{ columnId: string, tasks: Task[], moveCard: (dragIndex: number, hoverIndex: number, sourceColumn: string, destColumn: string) => void }> = ({ columnId, tasks, moveCard }) => {
+  const [, drop] = useDrop({
+    accept: CARD_TYPE,
+    hover: () => { },
+  });
+
+  return (
+    <div ref={(instance) => drop(instance)} className="w-72 p-4">
+      <h2 className="mb-4 text-sm font-medium text-gray-400 dark:text-gray-300 flex items-center">
+        {columnId.charAt(0).toUpperCase() + columnId.slice(1)}
+      </h2>
+      {tasks.map((task, index) => (
+        <DraggableCard key={task.id} task={task} index={index} moveCard={moveCard} columnId={columnId} />
+      ))}
+    </div>
+  );
 };
 
 export default function Kanban() {
@@ -132,34 +127,10 @@ export default function Kanban() {
     setCurrentTask(task);
     setOpen(true);
   };
-  const handleSelect = (category: string) => {
-    console.log(`Selected category: ${category}`);
-  };
+
   const handleClose = () => {
     setOpen(false);
     setCurrentTask(null);
-  };
-
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
-
-    const { source, destination } = result;
-
-    if (source.droppableId === destination.droppableId && source.index === destination.index)
-      return;
-
-    const sourceColumn = tasks[source.droppableId];
-    const destColumn = tasks[destination.droppableId];
-    const sourceItems = Array.from(sourceColumn);
-    const destItems = Array.from(destColumn);
-    const [removed] = sourceItems.splice(source.index, 1);
-    destItems.splice(destination.index, 0, removed);
-
-    setTasks({
-      ...tasks,
-      [source.droppableId]: sourceItems,
-      [destination.droppableId]: destItems,
-    });
   };
 
   const handleCategorySelect = (category: string) => {
@@ -167,30 +138,34 @@ export default function Kanban() {
     setTasks(taskData[category]);
   };
 
-  const renderCard = (task: Task, index: number) => (
-    <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
-      {(provided) => (
-        <div
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          className="bg-white p-3 rounded-lg shadow-sm mb-4 dark:bg-gray-800 dark:text-white" // Add dark mode classes
-          onClick={() => handleCardClick(task)}
-        >
-          <h3 className="text-sm font-semibold mb-1">{task.title}</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {task.description}
-          </p>
-        </div>
-      )}
-    </Draggable>
-  );
+  const moveCard = (dragIndex: number, hoverIndex: number, sourceColumn: string, destColumn: string) => {
+    setTasks((prevTasks) => {
+      const newTasks = { ...prevTasks };
+      const sourceItems = [...newTasks[sourceColumn]];
+      const [draggedItem] = sourceItems.splice(dragIndex, 1);
+
+      // Update the status of the dragged item
+      draggedItem.status = destColumn;
+
+      if (sourceColumn === destColumn) {
+        sourceItems.splice(hoverIndex, 0, draggedItem);
+        newTasks[sourceColumn] = sourceItems;
+      } else {
+        const destItems = [...newTasks[destColumn]];
+        destItems.splice(hoverIndex, 0, draggedItem);
+        newTasks[destColumn] = destItems;
+        newTasks[sourceColumn] = sourceItems; // Ensure the source column is updated
+      }
+
+      return newTasks;
+    });
+  };
 
   return (
     <>
       <Navbar />
       <div className="flex h-screen dark:bg-gray-900"> {/* Add dark mode class */}
-      <Sidebar onSelect={handleSelect} />
+        <Sidebar onSelect={handleCategorySelect} />
         <div className="flex flex-col flex-1">
           <header className="h-[60px] flex items-center px-4 shadow-md dark:bg-gray-800"> {/* Add dark mode class */}
             <h1 className="text-sm font-medium text-gray-900 dark:text-gray-50 flex items-center">
@@ -199,27 +174,18 @@ export default function Kanban() {
             </h1>
           </header>
           <main className="flex-1 overflow-auto py-4 px-4 bg-gray-100 dark:bg-gray-900"> {/* Add dark mode class */}
-            <DragDropContext onDragEnd={handleDragEnd}>
+            <DndProvider backend={HTML5Backend}>
               <div className="flex space-x-4">
                 {Object.entries(tasks).map(([columnId, columnTasks]) => (
-                  <Droppable key={columnId} droppableId={columnId} direction="vertical">
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className="w-72"
-                      >
-                        <h2 className="mb-4 text-sm font-medium text-gray-400 dark:text-gray-300 flex items-center">
-                          {columnId.charAt(0).toUpperCase() + columnId.slice(1)}
-                        </h2>
-                        {columnTasks.map((task, index) => renderCard(task, index))}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
+                  <DroppableColumn
+                    key={columnId}
+                    columnId={columnId}
+                    tasks={columnTasks}
+                    moveCard={moveCard}
+                  />
                 ))}
               </div>
-            </DragDropContext>
+            </DndProvider>
           </main>
           {currentTask && (
             <Dialog open={open} onOpenChange={setOpen}>
