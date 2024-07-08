@@ -118,7 +118,6 @@ export default function Navbar() {
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
                   Theme
-                  
                 </DropdownMenuSubTrigger>
                 <DropdownMenuSubContent className="left-0">
                   <DropdownMenuItem onClick={() => setTheme("light")}>
@@ -150,10 +149,6 @@ export default function Navbar() {
 }
 
 // Icons components remain unchanged
-
-
-// Icons components remain unchanged
-
 
 function BellIcon(props: any) {
   return (
