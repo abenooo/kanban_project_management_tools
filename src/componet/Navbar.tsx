@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -15,8 +17,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { CiLogout } from "react-icons/ci";
 import { RxAvatar } from "react-icons/rx";
+import { useTheme } from "./DarkTheme"; // Import the useTheme hook
 
 export default function Navbar() {
+  const { setTheme } = useTheme();
+
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="container flex h-14 items-center justify-between px-4 sm:px-6 md:px-8">
@@ -113,11 +118,18 @@ export default function Navbar() {
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
                   Theme
+                  
                 </DropdownMenuSubTrigger>
                 <DropdownMenuSubContent className="left-0">
-                  <DropdownMenuItem>Light</DropdownMenuItem>
-                  <DropdownMenuItem>Dark</DropdownMenuItem>
-                  <DropdownMenuItem>Match browser</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("light")}>
+                    Light
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("dark")}>
+                    Dark
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("system")}>
+                    Match browser
+                  </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
               <DropdownMenuSeparator />
@@ -136,6 +148,9 @@ export default function Navbar() {
     </header>
   );
 }
+
+// Icons components remain unchanged
+
 
 // Icons components remain unchanged
 
