@@ -127,13 +127,14 @@ export default function Kanban() {
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const [currentCategory, setCurrentCategory] = useState("Product Roadmap");
   const [tasks, setTasks] = useState(taskData[currentCategory]);
-  // const { theme, setTheme } = useTheme(); // Use the useTheme hook
 
   const handleCardClick = (task: Task) => {
     setCurrentTask(task);
     setOpen(true);
   };
-
+  const handleSelect = (category: string) => {
+    console.log(`Selected category: ${category}`);
+  };
   const handleClose = () => {
     setOpen(false);
     setCurrentTask(null);
@@ -144,10 +145,7 @@ export default function Kanban() {
 
     const { source, destination } = result;
 
-    if (
-      source.droppableId === destination.droppableId &&
-      source.index === destination.index
-    )
+    if (source.droppableId === destination.droppableId && source.index === destination.index)
       return;
 
     const sourceColumn = tasks[source.droppableId];
@@ -192,7 +190,7 @@ export default function Kanban() {
     <>
       <Navbar />
       <div className="flex h-screen dark:bg-gray-900"> {/* Add dark mode class */}
-        <Sidebar onSelect={handleCategorySelect} />
+      <Sidebar onSelect={handleSelect} />
         <div className="flex flex-col flex-1">
           <header className="h-[60px] flex items-center px-4 shadow-md dark:bg-gray-800"> {/* Add dark mode class */}
             <h1 className="text-sm font-medium text-gray-900 dark:text-gray-50 flex items-center">
@@ -204,7 +202,7 @@ export default function Kanban() {
             <DragDropContext onDragEnd={handleDragEnd}>
               <div className="flex space-x-4">
                 {Object.entries(tasks).map(([columnId, columnTasks]) => (
-                  <Droppable key={columnId} droppableId={columnId}>
+                  <Droppable key={columnId} droppableId={columnId} direction="vertical">
                     {(provided) => (
                       <div
                         ref={provided.innerRef}
@@ -212,12 +210,9 @@ export default function Kanban() {
                         className="w-72"
                       >
                         <h2 className="mb-4 text-sm font-medium text-gray-400 dark:text-gray-300 flex items-center">
-                          {columnId.charAt(0).toUpperCase() +
-                            columnId.slice(1)}
+                          {columnId.charAt(0).toUpperCase() + columnId.slice(1)}
                         </h2>
-                        {columnTasks.map((task, index) =>
-                          renderCard(task, index)
-                        )}
+                        {columnTasks.map((task, index) => renderCard(task, index))}
                         {provided.placeholder}
                       </div>
                     )}
@@ -320,7 +315,6 @@ export default function Kanban() {
     </>
   );
 }
-
 
 function KanbanIcon(props: any) {
   return (
