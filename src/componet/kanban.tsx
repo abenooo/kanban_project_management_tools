@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +32,11 @@ type TaskList = {
   [key: string]: Task[];
 };
 
-const taskData: { [key: string]: TaskList } = {
+type TaskData = {
+  [key: string]: TaskList;
+};
+
+const initialTaskData: TaskData = {
   "Product Roadmap": {
     backlog: [
       { id: 1, title: "Roadmap Task 1", description: "Description for task 1.", status: "backlog" },
@@ -63,25 +67,75 @@ const taskData: { [key: string]: TaskList } = {
       { id: 10, title: "Marketing Task 5", description: "Description for task 5.", status: "done" },
     ],
   },
-  // ... other categories
 };
 
-const DraggableCard: React.FC<{ task: Task, index: number, moveCard: (dragIndex: number, hoverIndex: number, sourceColumn: string, destColumn: string) => void, columnId: string }> = ({ task, index, moveCard, columnId }) => {
+const DraggableCard: React.FC<{
+  task: Task;
+  index: number;
+  moveCard: (
+    dragIndex: number,
+    hoverIndex: number,
+    sourceColumn: string,
+    destColumn: string,
+    sourceCategory: string,
+    destCategory: string
+  ) => void;
+  columnId: string;
+  categoryId: string;
+}> = ({ task, index, moveCard, columnId, categoryId }) => {
   const ref = useRef<HTMLDivElement>(null);
 
-  const [, drag] = useDrag({
+  const [{ isDragging }, drag] = useDrag({
     type: CARD_TYPE,
-    item: { id: task.id, index, columnId },
+    item: { id: task.id, index, columnId, categoryId },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
   });
 
   const [, drop] = useDrop({
     accept: CARD_TYPE,
-    hover: (draggedItem: { id: number; index: number; columnId: string }) => {
-      if (draggedItem.index !== index || draggedItem.columnId !== columnId) {
-        moveCard(draggedItem.index, index, draggedItem.columnId, columnId);
-        draggedItem.index = index;
-        draggedItem.columnId = columnId;
+    hover: (draggedItem: {
+      id: number;
+      index: number;
+      columnId: string;
+      categoryId: string;
+    }, monitor) => {
+      if (!ref.current) {
+        return;
       }
+      const dragIndex = draggedItem.index;
+      const hoverIndex = index;
+
+      if (dragIndex === hoverIndex && draggedItem.columnId === columnId && draggedItem.categoryId === categoryId) {
+        return;
+      }
+
+      const hoverBoundingRect = ref.current.getBoundingClientRect();
+      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      const clientOffset = monitor.getClientOffset();
+      const hoverClientY = clientOffset!.y - hoverBoundingRect.top;
+
+      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+        return;
+      }
+
+      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+        return;
+      }
+
+      moveCard(
+        dragIndex,
+        hoverIndex,
+        draggedItem.columnId,
+        columnId,
+        draggedItem.categoryId,
+        categoryId
+      );
+
+      draggedItem.index = hoverIndex;
+      draggedItem.columnId = columnId;
+      draggedItem.categoryId = categoryId;
     },
   });
 
@@ -90,7 +144,9 @@ const DraggableCard: React.FC<{ task: Task, index: number, moveCard: (dragIndex:
   return (
     <div
       ref={ref}
-      className="bg-white p-3 rounded-lg shadow-sm mb-4 dark:bg-gray-800 dark:text-white cursor-move"
+      className={`bg-white p-3 rounded-lg shadow-sm mb-4 dark:bg-gray-800 dark:text-white cursor-move ${
+        isDragging ? 'opacity-50' : ''
+      }`}
     >
       <h3 className="text-sm font-semibold mb-1">{task.title}</h3>
       <p className="text-sm text-gray-600 dark:text-gray-400">{task.description}</p>
@@ -99,19 +155,42 @@ const DraggableCard: React.FC<{ task: Task, index: number, moveCard: (dragIndex:
   );
 };
 
-const DroppableColumn: React.FC<{ columnId: string, tasks: Task[], moveCard: (dragIndex: number, hoverIndex: number, sourceColumn: string, destColumn: string) => void }> = ({ columnId, tasks, moveCard }) => {
+const DroppableColumn: React.FC<{
+  columnId: string;
+  tasks: Task[];
+  moveCard: (
+    dragIndex: number,
+    hoverIndex: number,
+    sourceColumn: string,
+    destColumn: string,
+    sourceCategory: string,
+    destCategory: string
+  ) => void;
+  categoryId: string;
+}> = ({ columnId, tasks, moveCard, categoryId }) => {
   const [, drop] = useDrop({
     accept: CARD_TYPE,
-    hover: () => { },
+    drop: (item: { id: number; index: number; columnId: string; categoryId: string }) => {
+      if (item.columnId !== columnId || item.categoryId !== categoryId) {
+        moveCard(item.index, tasks.length, item.columnId, columnId, item.categoryId, categoryId);
+      }
+    },
   });
 
   return (
-    <div ref={(instance) => drop(instance)} className="w-72 p-4">
+    <div ref={drop} className="w-72 p-4 bg-gray-200 dark:bg-gray-700 rounded-lg">
       <h2 className="mb-4 text-sm font-medium text-gray-400 dark:text-gray-300 flex items-center">
         {columnId.charAt(0).toUpperCase() + columnId.slice(1)}
       </h2>
       {tasks.map((task, index) => (
-        <DraggableCard key={task.id} task={task} index={index} moveCard={moveCard} columnId={columnId} />
+        <DraggableCard
+          key={task.id}
+          task={task}
+          index={index}
+          moveCard={moveCard}
+          columnId={columnId}
+          categoryId={categoryId}
+        />
       ))}
     </div>
   );
@@ -121,7 +200,7 @@ export default function Kanban() {
   const [open, setOpen] = useState(false);
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const [currentCategory, setCurrentCategory] = useState("Product Roadmap");
-  const [tasks, setTasks] = useState(taskData[currentCategory]);
+  const [taskData, setTaskData] = useState<TaskData>(initialTaskData);
 
   const handleCardClick = (task: Task) => {
     setCurrentTask(task);
@@ -135,57 +214,67 @@ export default function Kanban() {
 
   const handleCategorySelect = (category: string) => {
     setCurrentCategory(category);
-    setTasks(taskData[category]);
   };
 
-  const moveCard = (dragIndex: number, hoverIndex: number, sourceColumn: string, destColumn: string) => {
-    setTasks((prevTasks) => {
-      const newTasks = { ...prevTasks };
-      const sourceItems = [...newTasks[sourceColumn]];
+  const moveCard = (
+    dragIndex: number,
+    hoverIndex: number,
+    sourceColumn: string,
+    destColumn: string,
+    sourceCategory: string,
+    destCategory: string
+  ) => {
+    setTaskData((prevTaskData) => {
+      const newTaskData = { ...prevTaskData };
+
+      const sourceItems = [...newTaskData[sourceCategory][sourceColumn]];
       const [draggedItem] = sourceItems.splice(dragIndex, 1);
 
-      // Update the status of the dragged item
-      draggedItem.status = destColumn;
+      if (draggedItem) {
+        draggedItem.status = destColumn;
 
-      if (sourceColumn === destColumn) {
-        sourceItems.splice(hoverIndex, 0, draggedItem);
-        newTasks[sourceColumn] = sourceItems;
-      } else {
-        const destItems = [...newTasks[destColumn]];
-        destItems.splice(hoverIndex, 0, draggedItem);
-        newTasks[destColumn] = destItems;
-        newTasks[sourceColumn] = sourceItems; // Ensure the source column is updated
+        if (sourceCategory === destCategory && sourceColumn === destColumn) {
+          sourceItems.splice(hoverIndex, 0, draggedItem);
+          newTaskData[sourceCategory][sourceColumn] = sourceItems;
+        } else {
+          newTaskData[sourceCategory][sourceColumn] = sourceItems;
+
+          const destItems = [...newTaskData[destCategory][destColumn]];
+          destItems.splice(hoverIndex, 0, draggedItem);
+          newTaskData[destCategory][destColumn] = destItems;
+        }
       }
 
-      return newTasks;
+      return newTaskData;
     });
   };
 
   return (
-    <>
+    <DndProvider backend={HTML5Backend}>
       <Navbar />
-      <div className="flex h-screen dark:bg-gray-900"> {/* Add dark mode class */}
+      <div className="flex h-screen dark:bg-gray-900">
         <Sidebar onSelect={handleCategorySelect} />
         <div className="flex flex-col flex-1">
-          <header className="h-[60px] flex items-center px-4 shadow-md dark:bg-gray-800"> {/* Add dark mode class */}
+          <header className="h-[60px] flex items-center px-4 shadow-md dark:bg-gray-800">
             <h1 className="text-sm font-medium text-gray-900 dark:text-gray-50 flex items-center">
               <KanbanIcon className="mr-2 h-4 w-4" />
               Kanban Board - {currentCategory}
             </h1>
           </header>
-          <main className="flex-1 overflow-auto py-4 px-4 bg-gray-100 dark:bg-gray-900"> {/* Add dark mode class */}
-            <DndProvider backend={HTML5Backend}>
-              <div className="flex space-x-4">
-                {Object.entries(tasks).map(([columnId, columnTasks]) => (
+          <main className="flex-1 overflow-auto py-4 px-4 bg-gray-100 dark:bg-gray-900">
+            <div className="flex space-x-4">
+              {Object.entries(taskData[currentCategory]).map(
+                ([columnId, columnTasks]) => (
                   <DroppableColumn
                     key={columnId}
                     columnId={columnId}
                     tasks={columnTasks}
                     moveCard={moveCard}
+                    categoryId={currentCategory}
                   />
-                ))}
-              </div>
-            </DndProvider>
+                )
+              )}
+            </div>
           </main>
           {currentTask && (
             <Dialog open={open} onOpenChange={setOpen}>
@@ -278,7 +367,7 @@ export default function Kanban() {
           )}
         </div>
       </div>
-    </>
+    </DndProvider>
   );
 }
 
