@@ -3,8 +3,7 @@ import React, { useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { RxHamburgerMenu } from "react-icons/rx";
-import { DndProvider, useDrag, useDrop } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
+import { useDrag, useDrop } from "react-dnd";
 
 interface SidebarItem {
   id: string;
@@ -82,32 +81,30 @@ export function Sidebar({ onSelect }: SidebarProps) {
   }, []);
 
   return (
-    <DndProvider backend={HTML5Backend}>
-      <div className={`flex flex-col ${collapsed ? "w-20" : "w-64"} bg-background transition-width duration-300`}>
-        <div className="flex h-14 items-center justify-between border-b bg-muted px-4 sm:px-6">
-          <Link href="#" className="flex items-center gap-2" prefetch={false}>
-            {!collapsed && <span className="text-lg font-semibold">Kanban Board</span>}
-          </Link>
-          <Button variant="ghost" size="icon" className="rounded-full" onClick={toggleSidebar}>
-            <RxHamburgerMenu className="h-6 w-6" />
-            <span className="sr-only">Toggle sidebar</span>
-          </Button>
-        </div>
-        <div className="flex-1 overflow-auto">
-          <div className="grid gap-2 p-4 sm:p-6">
-            {sidebarItems.map((item, index) => (
-              <DraggableItem
-                key={item.id}
-                item={item}
-                index={index}
-                moveItem={moveItem}
-                onSelect={onSelect}
-              />
-            ))}
-          </div>
+    <div className={`flex flex-col ${collapsed ? "w-20" : "w-64"} bg-background transition-width duration-300`}>
+      <div className="flex h-14 items-center justify-between border-b bg-muted px-4 sm:px-6">
+        <Link href="#" className="flex items-center gap-2" prefetch={false}>
+          {!collapsed && <span className="text-lg font-semibold">Kanban Board</span>}
+        </Link>
+        <Button variant="ghost" size="icon" className="rounded-full" onClick={toggleSidebar}>
+          <RxHamburgerMenu className="h-6 w-6" />
+          <span className="sr-only">Toggle sidebar</span>
+        </Button>
+      </div>
+      <div className="flex-1 overflow-auto">
+        <div className="grid gap-2 p-4 sm:p-6">
+          {sidebarItems.map((item, index) => (
+            <DraggableItem
+              key={item.id}
+              item={item}
+              index={index}
+              moveItem={moveItem}
+              onSelect={onSelect}
+            />
+          ))}
         </div>
       </div>
-    </DndProvider>
+    </div>
   );
 }
 
