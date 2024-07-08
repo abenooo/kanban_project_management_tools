@@ -1,6 +1,9 @@
+"use client";
+
+import React, { useState } from "react";
 import Link from "next/link";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { RxHamburgerMenu } from "react-icons/rx";
 
 const sidebarItems = [
   { label: "Product Roadmap", icon: CircuitBoardIcon },
@@ -11,32 +14,38 @@ const sidebarItems = [
   { label: "Startup Launch", icon: LayoutTemplateIcon },
 ];
 
-export function Sidebar({ onSelect }: { onSelect: (category: string) => void }) {
+export function Sidebar({
+  onSelect,
+}: {
+  onSelect: (category: string) => void;
+}) {
+  const [collapsed, setCollapsed] = useState(false);
+
+  const toggleSidebar = () => {
+    setCollapsed(!collapsed);
+  };
+
   return (
-    <div className="flex flex-col w-64 bg-background">
+    <div
+      className={`flex flex-col ${
+        collapsed ? "w-20" : "w-64"
+      } bg-background transition-width duration-300`}
+    >
       <div className="flex h-14 items-center justify-between border-b bg-muted px-4 sm:px-6">
         <Link href="#" className="flex items-center gap-2" prefetch={false}>
-          <TrelloIcon className="h-6 w-6" />
-          <span className="text-lg font-semibold">Kanban Board</span>
+          {!collapsed && (
+            <span className="text-lg font-semibold">Kanban Board </span>
+          )}
         </Link>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <PlusIcon className="h-5 w-5" />
-              <span className="sr-only">Create new</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>
-              <CircuitBoardIcon className="mr-2 h-4 w-4" />
-              New Board
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <LayoutTemplateIcon className="h-6 w-6" />
-              New Template
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full"
+          onClick={toggleSidebar}
+        >
+          <RxHamburgerMenu className="h-6 w-6" />
+          <span className="sr-only">Toggle sidebar</span>
+        </Button>
       </div>
       <div className="flex-1 overflow-auto">
         <nav className="grid gap-2 p-4 sm:p-6">
@@ -47,7 +56,7 @@ export function Sidebar({ onSelect }: { onSelect: (category: string) => void }) 
               className="flex items-center gap-3 rounded-md bg-muted px-3 py-2 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
             >
               <item.icon className="h-5 w-5" />
-              <span>{item.label}</span>
+              {!collapsed && <span>{item.label}</span>}
             </button>
           ))}
         </nav>
