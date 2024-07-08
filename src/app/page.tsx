@@ -1,8 +1,11 @@
-import Kanban from "../componet/kanban"
+import Kanban from "../componet/kanban";
+import { ThemeProvider } from "../componet/DarkTheme";
 export default function Home() {
   return (
-    <div>
-     <Kanban/>
-    </div>
+    <>
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <Kanban />
+      </ThemeProvider>
+    </>
   );
 }
