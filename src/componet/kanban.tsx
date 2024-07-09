@@ -67,6 +67,66 @@ const initialTaskData: TaskData = {
       { id: 10, title: "Marketing Task 5", description: "Description for task 5.", status: "done" },
     ],
   },
+  "Engineering Sprints": {
+    backlog: [
+      { id: 11, title: "Sprint Task 1", description: "Description for task 1.", status: "backlog" },
+      { id: 12, title: "Sprint Task 2", description: "Description for task 2.", status: "backlog" },
+    ],
+    todo: [
+      { id: 13, title: "Sprint Task 3", description: "Description for task 3.", status: "todo" },
+    ],
+    inProgress: [
+      { id: 14, title: "Sprint Task 4", description: "Description for task 4.", status: "inProgress" },
+    ],
+    done: [
+      { id: 15, title: "Sprint Task 5", description: "Description for task 5.", status: "done" },
+    ],
+  },
+  "Content Calendar": {
+    backlog: [
+      { id: 16, title: "Content Task 1", description: "Description for task 1.", status: "backlog" },
+      { id: 17, title: "Content Task 2", description: "Description for task 2.", status: "backlog" },
+    ],
+    todo: [
+      { id: 18, title: "Content Task 3", description: "Description for task 3.", status: "todo" },
+    ],
+    inProgress: [
+      { id: 19, title: "Content Task 4", description: "Description for task 4.", status: "inProgress" },
+    ],
+    done: [
+      { id: 20, title: "Content Task 5", description: "Description for task 5.", status: "done" },
+    ],
+  },
+  "Design Sprint": {
+    backlog: [
+      { id: 21, title: "Design Task 1", description: "Description for task 1.", status: "backlog" },
+      { id: 22, title: "Design Task 2", description: "Description for task 2.", status: "backlog" },
+    ],
+    todo: [
+      { id: 23, title: "Design Task 3", description: "Description for task 3.", status: "todo" },
+    ],
+    inProgress: [
+      { id: 24, title: "Design Task 4", description: "Description for task 4.", status: "inProgress" },
+    ],
+    done: [
+      { id: 25, title: "Design Task 5", description: "Description for task 5.", status: "done" },
+    ],
+  },
+  "Startup Launch": {
+    backlog: [
+      { id: 26, title: "Launch Task 1", description: "Description for task 1.", status: "backlog" },
+      { id: 27, title: "Launch Task 2", description: "Description for task 2.", status: "backlog" },
+    ],
+    todo: [
+      { id: 28, title: "Launch Task 3", description: "Description for task 3.", status: "todo" },
+    ],
+    inProgress: [
+      { id: 29, title: "Launch Task 4", description: "Description for task 4.", status: "inProgress" },
+    ],
+    done: [
+      { id: 30, title: "Launch Task 5", description: "Description for task 5.", status: "done" },
+    ],
+  },
 };
 
 const DraggableCard: React.FC<{
@@ -249,6 +309,9 @@ export default function Kanban() {
     });
   };
 
+  // Check if the currentCategory exists in taskData
+  const validCategory = taskData[currentCategory] ? currentCategory : Object.keys(taskData)[0];
+
   return (
     <DndProvider backend={HTML5Backend}>
       <Navbar />
@@ -258,19 +321,19 @@ export default function Kanban() {
           <header className="h-[60px] flex items-center px-4 shadow-md dark:bg-gray-800">
             <h1 className="text-sm font-medium text-gray-900 dark:text-gray-50 flex items-center">
               <KanbanIcon className="mr-2 h-4 w-4" />
-              Kanban Board - {currentCategory}
+              Kanban Board - {validCategory}
             </h1>
           </header>
           <main className="flex-1 overflow-auto py-4 px-4 bg-gray-100 dark:bg-gray-900">
             <div className="flex space-x-4">
-              {Object.entries(taskData[currentCategory]).map(
+              {Object.entries(taskData[validCategory]).map(
                 ([columnId, columnTasks]) => (
                   <DroppableColumn
                     key={columnId}
                     columnId={columnId}
                     tasks={columnTasks}
                     moveCard={moveCard}
-                    categoryId={currentCategory}
+                    categoryId={validCategory}
                   />
                 )
               )}
