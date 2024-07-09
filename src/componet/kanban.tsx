@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -228,6 +228,8 @@ const DroppableColumn: React.FC<{
   ) => void;
   categoryId: string;
 }> = ({ columnId, tasks, moveCard, categoryId }) => {
+  const ref = useRef<HTMLDivElement>(null);
+
   const [, drop] = useDrop({
     accept: CARD_TYPE,
     drop: (item: { id: number; index: number; columnId: string; categoryId: string }) => {
@@ -237,8 +239,14 @@ const DroppableColumn: React.FC<{
     },
   });
 
+  useEffect(() => {
+    if (ref.current) {
+      drop(ref);
+    }
+  }, [drop]);
+
   return (
-    <div ref={drop} className="w-72 p-4 bg-gray-200 dark:bg-gray-700 rounded-lg">
+    <div ref={ref} className="w-72 p-4 bg-gray-200 dark:bg-gray-700 rounded-lg">
       <h2 className="mb-4 text-sm font-medium text-gray-400 dark:text-gray-300 flex items-center">
         {columnId.charAt(0).toUpperCase() + columnId.slice(1)}
       </h2>
