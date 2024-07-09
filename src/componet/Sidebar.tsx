@@ -16,6 +16,7 @@ interface DraggableItemProps {
   index: number;
   moveItem: (dragIndex: number, hoverIndex: number) => void;
   onSelect: (category: string) => void;
+  collapsed: boolean;
 }
 
 interface SidebarProps {
@@ -31,7 +32,7 @@ const sidebarItemsData: SidebarItem[] = [
   { id: "6", label: "Startup Launch", icon: LayoutTemplateIcon },
 ];
 
-const DraggableItem: React.FC<DraggableItemProps> = ({ item, index, moveItem, onSelect }) => {
+const DraggableItem: React.FC<DraggableItemProps> = ({ item, index, moveItem, onSelect, collapsed }) => {
   const ref = useRef<HTMLDivElement>(null);
 
   const [, drag] = useDrag({
@@ -57,8 +58,8 @@ const DraggableItem: React.FC<DraggableItemProps> = ({ item, index, moveItem, on
       className="flex items-center gap-3 rounded-md bg-muted px-3 py-2 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground cursor-move"
       onClick={() => onSelect(item.label)}
     >
-      <item.icon className="h-5 w-5" />
-      <span>{item.label}</span>
+      <item.icon className="h-6 w-6 md:h-8 md:w-8" />
+      {!collapsed && <span className="sidebar-item-label">{item.label}</span>}
     </div>
   );
 };
@@ -92,7 +93,7 @@ export function Sidebar({ onSelect }: SidebarProps) {
         </Button>
       </div>
       <div className="flex-1 overflow-auto">
-        <div className="grid gap-2 p-4 sm:p-6">
+        <div className={`grid gap-2 p-4 sm:p-6 ${collapsed ? "justify-center" : ""}`}>
           {sidebarItems.map((item, index) => (
             <DraggableItem
               key={item.id}
@@ -100,6 +101,7 @@ export function Sidebar({ onSelect }: SidebarProps) {
               index={index}
               moveItem={moveItem}
               onSelect={onSelect}
+              collapsed={collapsed}
             />
           ))}
         </div>
@@ -113,8 +115,7 @@ function CircuitBoardIcon(props: React.SVGProps<SVGSVGElement>) {
     <svg
       {...props}
       xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
+      className="w-6 h-6 md:w-8 md:h-8"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -136,8 +137,7 @@ function LayoutTemplateIcon(props: React.SVGProps<SVGSVGElement>) {
     <svg
       {...props}
       xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
+      className="w-6 h-6 md:w-8 md:h-8"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
