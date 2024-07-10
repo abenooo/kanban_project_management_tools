@@ -27,7 +27,6 @@ export default function Navbar() {
       <div className="container flex h-14 items-center justify-between px-4 sm:px-6 md:px-8">
         <nav className="flex items-center gap-6">
           <Link href="#" className="flex items-center gap-2" prefetch={false}>
-            <TrelloIcon className="h-6 w-6" />
             <span className="sr-only">CodeX Ethiopia</span>
           </Link>
           <div className="hidden items-center gap-6 md:flex">
