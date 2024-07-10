@@ -1,0 +1,8 @@
+.draggable-card {
+    transition: transform 0.2s ease;
+  }
+  
+  .draggable-card.is-dragging {
+    opacity: 0.5;
+  }
+  
