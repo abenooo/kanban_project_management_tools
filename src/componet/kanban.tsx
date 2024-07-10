@@ -59,7 +59,66 @@ const initialTaskData: TaskData = {
       { id: 10, title: "Marketing Task 5", description: "Description for task 5.", status: "done" },
     ],
   },
-  // Other categories remain unchanged
+  "Engineering Sprints": {
+    backlog: [
+      { id: 11, title: "Engineering Task 1", description: "Description for task 1.", status: "backlog" },
+      { id: 12, title: "Engineering Task 2", description: "Description for task 2.", status: "backlog" },
+    ],
+    todo: [
+      { id: 13, title: "Engineering Task 3", description: "Description for task 3.", status: "todo" },
+    ],
+    inProgress: [
+      { id: 14, title: "Engineering Task 4", description: "Description for task 4.", status: "inProgress" },
+    ],
+    done: [
+      { id: 15, title: "Engineering Task 5", description: "Description for task 5.", status: "done" },
+    ],
+  },
+  "Content Calendar": {
+    backlog: [
+      { id: 16, title: "Content Task 1", description: "Description for task 1.", status: "backlog" },
+      { id: 17, title: "Content Task 2", description: "Description for task 2.", status: "backlog" },
+    ],
+    todo: [
+      { id: 18, title: "Content Task 3", description: "Description for task 3.", status: "todo" },
+    ],
+    inProgress: [
+      { id: 19, title: "Content Task 4", description: "Description for task 4.", status: "inProgress" },
+    ],
+    done: [
+      { id: 20, title: "Content Task 5", description: "Description for task 5.", status: "done" },
+    ],
+  },
+  "Design Sprint": {
+    backlog: [
+      { id: 21, title: "Design Task 1", description: "Description for task 1.", status: "backlog" },
+      { id: 22, title: "Design Task 2", description: "Description for task 2.", status: "backlog" },
+    ],
+    todo: [
+      { id: 23, title: "Design Task 3", description: "Description for task 3.", status: "todo" },
+    ],
+    inProgress: [
+      { id: 24, title: "Design Task 4", description: "Description for task 4.", status: "inProgress" },
+    ],
+    done: [
+      { id: 25, title: "Design Task 5", description: "Description for task 5.", status: "done" },
+    ],
+  },
+  "Startup Launch": {
+    backlog: [
+      { id: 26, title: "Startup Task 1", description: "Description for task 1.", status: "backlog" },
+      { id: 27, title: "Startup Task 2", description: "Description for task 2.", status: "backlog" },
+    ],
+    todo: [
+      { id: 28, title: "Startup Task 3", description: "Description for task 3.", status: "todo" },
+    ],
+    inProgress: [
+      { id: 29, title: "Startup Task 4", description: "Description for task 4.", status: "inProgress" },
+    ],
+    done: [
+      { id: 30, title: "Startup Task 5", description: "Description for task 5.", status: "done" },
+    ],
+  },
 };
 
 const DraggableCard: React.FC<{
